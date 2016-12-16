@@ -176,6 +176,7 @@ EXAMPLES = '''
 '''
 
 import os
+import math
 
 import docker
 
@@ -262,7 +263,9 @@ class DockerWorker(object):
             self.compare_pid_mode(container_info) or
             self.compare_volumes(container_info) or
             self.compare_volumes_from(container_info) or
-            self.compare_environment(container_info)
+            self.compare_cpu_shares(container_info) or
+            self.compare_cpuset(container_info) or
+            self.compare_mem_limit(container_info)
         )
 
     def compare_ipc_mode(self, container_info):
@@ -288,6 +291,7 @@ class DockerWorker(object):
         current_privileged = container_info['HostConfig']['Privileged']
         if new_privileged != current_privileged:
             return True
+
 
     def compare_image(self, container_info=None):
         container_info = container_info or self.get_container_info()
@@ -365,6 +369,33 @@ class DockerWorker(object):
                     return True
                 if current_env[k] != v:
                     return True
+
+    def compare_cpu_shares(self, container_info):
+        new_cpu_shares = self.params.get('cpu_shares')
+        current_cpu_shares = container_info['HostConfig']['CpuShares']
+        if new_cpu_shares != current_cpu_shares:
+            return True
+
+    def compare_cpuset(self, container_info):
+        new_cpuset = self.params.get('cpuset')
+        current_cpuset = container_info['HostConfig']['CpusetCpus']
+        if new_cpuset != current_cpuset:
+            return True
+
+    def compare_mem_limit(self, container_info):
+        mem_tmp = self.params.get('mem_limit')
+        new_mem_limit = self._byte_format(mem_tmp[:-1], mem_tmp[-1])
+        current_mem_limit = container_info['HostConfig']['Memory']
+        if new_mem_limit != current_mem_limit:
+            return True
+
+    # do not use it, swap can be set automatically
+    def compare_memswap_limit(self, container_info):
+        memswap_tmp = self.params.get('memswap_limit')
+        new_memswap_limit = self._byte_format(memswap_tmp[:-1], memswap_tmp[-1])
+        current_memswap_limit = container_info['HostConfig']['MemorySwap']
+        if new_memswap_limit != current_memswap_limit:
+            return True
 
     def parse_image(self):
         full_image = self.params.get('image')
@@ -472,7 +503,9 @@ class DockerWorker(object):
             'ipc_mode': self.params.get('ipc_mode'),
             'pid_mode': self.params.get('pid_mode'),
             'privileged': self.params.get('privileged'),
-            'volumes_from': self.params.get('volumes_from')
+            'volumes_from': self.params.get('volumes_from'),
+            'mem_limit': self.params.get('mem_limit'),
+            'memswap_limit': self.params.get('memswap_limit')
         }
 
         if self.params.get('restart_policy') in ['on-failure', 'always']:
@@ -497,6 +530,11 @@ class DockerWorker(object):
         env = self._inject_env_var(self.params.get('environment'))
         return {k: "" if env[k] is None else env[k] for k in env}
 
+    def _byte_format(self, size, unit='b'):
+        units = ['b','k','m','g']
+        ft = int(math.pow(1024,units.index(unit)))
+        return int(size) * ft
+
     def build_container_options(self):
         volumes, binds = self.generate_volumes()
         return {
@@ -507,6 +545,8 @@ class DockerWorker(object):
             'image': self.params.get('image'),
             'name': self.params.get('name'),
             'volumes': volumes,
+            'cpu_shares': self.params.get('cpu_shares'),
+            'cpuset': self.params.get('cpuset'),
             'tty': True
         }
 
@@ -643,7 +683,11 @@ def generate_module():
         tls_key=dict(required=False, type='str'),
         tls_cacert=dict(required=False, type='str'),
         volumes=dict(required=False, type='list'),
-        volumes_from=dict(required=False, type='list')
+        volumes_from=dict(required=False, type='list'),
+        mem_limit=dict(required=False, type='str', default='4g'),
+        memswap_limit=dict(required=False, type='str'),
+        cpu_shares=dict(required=False, type='int', default=1024),
+        cpuset=dict(required=False, type='str')
     )
     required_together = [
         ['tls_cert', 'tls_key']
@@ -704,3 +748,4 @@ def main():
 from ansible.module_utils.basic import *  # noqa
 if __name__ == '__main__':
     main()
+
