@@ -1,0 +1,48 @@
+FROM kolla/centos-binary-base:1.1.3
+MAINTAINER Kolla Project (https://launchpad.net/kolla)
+
+
+
+RUN yum -y install \
+        gcc \
+        git \
+        libffi-devel \
+        libxml2-devel \
+        libxslt-devel \
+        MariaDB-devel \
+        MariaDB-shared \
+        openssl-devel \
+        python-devel \
+        openssh-clients \
+    && yum clean all
+
+
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python get-pip.py \
+    && rm get-pip.py \
+    && pip --no-cache-dir install \
+        MySQL-python \
+        os-client-config==1.16.0 \
+        pyudev \
+        shade==1.4.0
+
+RUN git clone https://github.com/ansible/ansible.git \
+    && cd ansible \
+    && git checkout 89569d035ea5002302a0a6b03451a4963fd83eb3 \
+    && git submodule update --init --recursive \
+    && pip --no-cache-dir install .
+
+RUN useradd -m --user-group ansible --groups kolla \
+    && mkdir -p /etc/ansible /usr/share/ansible \
+    && echo 'localhost ansible_connection=local' > /etc/ansible/hosts \
+    && sed -i 's|  "identity_api_version": "2.0",|  "identity_api_version": "3",|' /usr/lib/python2.7/site-packages/os_client_config/defaults.json
+
+COPY find_disks.py kolla_keystone_service.py kolla_keystone_user.py kolla_sanity.py kolla_zookeeper.py /usr/share/ansible/
+COPY ansible.cfg /home/ansible/.ansible.cfg
+
+CMD ["/bin/sleep", "infinity"]
+
+
+
+USER ansible
