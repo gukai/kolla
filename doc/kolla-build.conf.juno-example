@@ -1,0 +1,28 @@
+[DEFAULT]
+base = centos
+base_tag = 6
+debug = true
+maintainer = gukai (gukai@syswin.com)
+namespace = image-test
+#rpm_setup_config = local_kolla_juno.repo, local_openstack_juno.repo
+
+#build_args = <None>
+#include_header = <None>
+#include_footer = <None>
+#keep = false
+#cache = true
+#no_cache = false
+#profile = <None>
+#push = false
+#push_threads = 1
+#retries = 3
+#regex = <None>
+#registry = <None>
+#save_dependency = <None>
+#install_type = binary
+#threads = 8
+#tag = 1.1.3
+#template_only = false
+#timeout = 120
+#apt_sources_list = <None>
+#apt_preferences = <None>
