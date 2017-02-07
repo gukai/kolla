@@ -11,7 +11,121 @@ RUN yum -y install \
 {% endif %}
 {% if install_type == 'binary' %}
     {% if base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] %}
-
+        {% if base_distro_tag == '6' %}
+# TODO(Allen) Remove python-dogpile-cache after the requirement of
+# python-ironicclient is fixed.
+# Mars gu: remove all python2 packages, because python 3.x would not install in el6 env.
+RUN yum -y install \
+        avahi-libs \
+        cups-libs \
+        fontconfig \
+        fontpackages-filesystem \
+        freetype \
+        initscripts \
+        libjpeg-turbo \
+        libpng \
+        libtomcrypt \
+        libtommath \
+        libX11 \
+        libX11-common \
+        libXau \
+        libxcb \
+        libXext \
+        libXi \
+        libxslt \
+        libyaml \
+        MySQL-python \
+        Percona-Server-shared-56 \
+        pyOpenSSL \
+        pyparsing \
+        python-alembic \
+        python-amqp \
+        python-anyjson \
+        python-barbicanclient \
+        python-beaker \
+        python-cachetools \
+        python-ceilometerclient \
+        python-cliff \
+        python-cmd2 \
+        python-congressclient \
+        python-contextlib2 \
+        python-dateutil \
+        python-decorator \
+        python-designateclient \
+        python-dogpile-cache \
+        python-editor \
+        python-enum34 \
+        python-extras \
+        python-fixtures \
+        python-futures \
+        python-glanceclient \
+        python-heatclient \
+        python-httplib2 \
+        python-idna \
+        python-inotify \
+        python-ipaddress \
+        python-ironicclient \
+        python-jsonpatch \
+        python-jsonpointer \
+        python-jsonschema \
+        python-keyring \
+        python-keystoneauth1 \
+        python-keystoneclient \
+        python-keystonemiddleware \
+        python-kombu \
+        python-linecache2 \
+        python-lxml \
+        python-magnumclient \
+        python-mako \
+        python-manilaclient \
+        python-memcached \
+        python-migrate \
+        python-mimeparse \
+        python-mistralclient \
+        python-monotonic \
+        python-muranoclient \
+        python-netaddr \
+        python-netifaces \
+        python-neutronclient \
+        python-novaclient \
+        python-openstackclient \
+        python-paste \
+        python-paste-deploy \
+        python-pbr \
+        python-pip \
+        python-ply \
+        python-posix_ipc \
+        python-prettytable \
+        python-pycparser \
+        python-PyMySQL \
+        python-repoze-lru \
+        python-requests \
+        python-retrying \
+        python-routes \
+        python-saharaclient \
+        python-simplejson \
+        python-sqlalchemy \
+        python-sqlparse \
+        python-stevedore \
+        python-swiftclient \
+        python-tempita \
+        python-testtools \
+        python-traceback2 \
+        python-troveclient \
+        python-tuskarclient \
+        python-unicodecsv \
+        python-unittest2 \
+        python-urllib3 \
+        python-warlock \
+        python-webob \
+        python-wrapt \
+        python-zaqarclient \
+        PyYAML \
+        systemd-sysv \
+        sysvinit-tools \
+        tcp_wrappers-libs \
+    && yum clean all
+        {% else %}
 # TODO(Allen) Remove python-dogpile-cache after the requirement of
 # python-ironicclient is fixed.
 RUN yum -y install \
@@ -152,7 +266,8 @@ RUN yum -y install \
         sysvinit-tools \
         tcp_wrappers-libs \
     && yum clean all
-
+        {% endif %}
+        {# endif for repo setup for EL6 #}
     {% elif base_distro in ['ubuntu'] %}
 
 # This will prevent questions from being asked during the install
