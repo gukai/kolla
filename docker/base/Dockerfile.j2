@@ -76,8 +76,6 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6 \
          epel-release \
          yum-plugin-priorities \
     && yum clean all
-# ADD Local Juno repo.
-COPY local_openstack_juno.repo.el6  /etc/yum.repos.d/local_openstack_juno.repo
         {% else %}
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 \
     && yum install -y \
