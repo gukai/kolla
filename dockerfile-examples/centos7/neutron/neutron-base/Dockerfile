@@ -7,6 +7,7 @@ MAINTAINER Kolla Project (https://launchpad.net/kolla)
 RUN yum -y install \
         openstack-neutron \
         openstack-neutron-ml2 \
+        python-neutron \
         openvswitch \
     && yum clean all
 
