@@ -8,6 +8,7 @@ RUN yum -y install \
         openstack-neutron \
         openstack-neutron-ml2 \
         openvswitch \
+        python-neutron \
     && yum clean all
 
     {% elif base_distro in ['ubuntu'] %}
